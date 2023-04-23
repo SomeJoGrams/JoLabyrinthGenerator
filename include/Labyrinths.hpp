@@ -131,6 +131,8 @@ namespace Lab
         static void print2DContainer(const std::vector<std::vector<Val>> &inputVector);
         static void print2DLabyrinthToFile(const std::string fileName, const std::vector<std::vector<bool>> &inputVector,const std::string freeFieldEmojiUnicode,const std::string notFreeEmojiUnicode);
         static void print2DLabyrinthToFile(const std::string fileName,const std::vector<std::vector<bool>> &inputVector, const std::vector<std::vector<bool>> &inputVector2,const std::string freeFieldEmojiUnicode,const std::string notFreeEmojiUnicode);
+        static void print2DLabyrinthToFile(const std::string fileName,const std::vector<std::vector<bool>> &inputVector, const std::vector<std::vector<bool>> &inputVector2,const std::string freeFieldEmojiUnicode,const std::string notFreeEmojiUnicode,const bool printIndices);
+
     };
 
 }

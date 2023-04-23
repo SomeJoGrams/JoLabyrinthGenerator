@@ -377,7 +377,10 @@ namespace Lab
         fileStream << '\n';
     }
 
-    void PrintInterface::print2DLabyrinthToFile(const std::string fileName,const std::vector<std::vector<bool>> &inputVector, const std::vector<std::vector<bool>> &inputVector2,const std::string freeFieldEmojiUnicode,const std::string notFreeEmojiUnicode)
+    void PrintInterface::print2DLabyrinthToFile(const std::string fileName,
+        const std::vector<std::vector<bool>> &inputVector, const std::vector<std::vector<bool>> &inputVector2,
+        const std::string freeFieldEmojiUnicode,const std::string notFreeEmojiUnicode,
+        const bool printIndices)
     {
         // open the fileStream
         // convert to utf code by (\U+2B1B) 1. remove "+", 2. backslash before U 3. replace + with 3 zero
@@ -390,8 +393,19 @@ namespace Lab
         // write stuff
         auto indexColumn = 0;
         // every inner vector itor has to have the same size
+        if (printIndices){
+            fileStream << "X";
+            for (auto xIndex = 0; xIndex < inputVector.size(); xIndex++){
+                fileStream << xIndex;
+            }
+            fileStream << "\n";
+        }
+
         for (auto yIndex = 0; yIndex < inputVector[0].size(); yIndex++)
         {
+            if (printIndices){
+                fileStream << yIndex;
+            }
             for (auto xIndex = 0; xIndex < inputVector.size(); xIndex++)
             {
                 if (inputVector[xIndex][yIndex]){ // its a free Field
@@ -592,7 +606,7 @@ namespace Lab
                 if (lb2D.blockField[currentPosition.xPosition][currentPosition.yPosition + 1] == 0 &&
                  visitedFields[currentPosition.xPosition + lb2D.blockField.size() * (currentPosition.yPosition + 1)] == 0){
                     if (viableWayFound){
-                        jumpBackStack.push_back(Position2D{currentPosition.xPosition,currentPosition.yPosition});
+                        jumpBackStack.push_back(Position2D{currentPosition.xPosition,currentPosition.yPosition + 1});
                     }
                     else{
                         nextField = Position2D{currentPosition.xPosition,currentPosition.yPosition + 1};
@@ -603,7 +617,7 @@ namespace Lab
                 if (lb2D.blockField[currentPosition.xPosition - 1][currentPosition.yPosition] == 0 
                 && visitedFields[currentPosition.xPosition - 1 + lb2D.blockField.size() * currentPosition.yPosition] == 0){
                     if (viableWayFound){
-                        jumpBackStack.push_back(Position2D{currentPosition.xPosition,currentPosition.yPosition});
+                        jumpBackStack.push_back(Position2D{currentPosition.xPosition - 1,currentPosition.yPosition});
                     }
                     else{
                         nextField = Position2D{currentPosition.xPosition - 1,currentPosition.yPosition};
@@ -614,7 +628,7 @@ namespace Lab
                 if (lb2D.blockField[currentPosition.xPosition][currentPosition.yPosition - 1] == 0 
                 && visitedFields[currentPosition.xPosition + lb2D.blockField.size() * (currentPosition.yPosition - 1)] == 0){
                     if (viableWayFound){
-                        jumpBackStack.push_back(Position2D{currentPosition.xPosition,currentPosition.yPosition});
+                        jumpBackStack.push_back(Position2D{currentPosition.xPosition,currentPosition.yPosition - 1});
                     }
                     else{
                         nextField = Position2D{currentPosition.xPosition,currentPosition.yPosition - 1};
@@ -622,6 +636,8 @@ namespace Lab
                     viableWayFound = true;
                 }
                 if(!viableWayFound && jumpBackStack.size() == 0){
+                    // the position got visited as last and still has to be added to the result!
+                    currentWayList.push_back(currentPosition); 
                     return currentWayList;
                 }
 
@@ -630,13 +646,14 @@ namespace Lab
                     //jumpBackStack.erase((jumpBackStack.begin())); // safe first element and delete it from jump back stack
                     nextField = jumpBackStack.back();
                     jumpBackStack.pop_back();
+                    // not necessary anymore, visited field are stored
                     // clear walked Postion (currentWayLength Position of the currentWayList)
                     // remove all position after the new current Position -> delete the way that reached dead end
-                    auto foundPosition = std::find(currentWayList.begin(), currentWayList.end(), nextField);
+                    //auto foundPosition = std::find(currentWayList.begin(), currentWayList.end(), nextField);
                     // foundPosition needs to be 1 bigger bc erase removes first element inclusive
                 }
                 viableWayFound = false;
-                visitedFields[currentPosition.xPosition + lb2D.blockField[0].size() * currentPosition.yPosition] = 1;
+                visitedFields[currentPosition.xPosition + lb2D.blockField.size() * currentPosition.yPosition] = 1;
                 currentWayList.push_back(nextField);
                 currentPosition = nextField;
             }            

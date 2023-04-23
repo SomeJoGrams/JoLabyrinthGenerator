@@ -9,26 +9,26 @@ int main(int, char **)
     const std::string blackEmoji("⬛");
     const std::string whiteEmoji("⬜");
 
-    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10, 10);
+    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10, 11);
     Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
-    Lab::Way foundPath{};
-    int maxtries = MAXTRIES;
-    // for (int i = 0; i < maxtries; i++){
-    //     inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 100, 100);
-    //     resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
-    //     for (Lab::Way path : resultWays){
-    //         if (path.size() > 10){
-    //             foundPath = path;
-    //         }
-    //     }
-    // }
-    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
+
+
+    //Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
     
-    Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);
-    Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji);
-    // for (Lab::Position2D pos : foundPath){
-    //     std::cout << pos.xPosition << " " << pos.yPosition << "\n";
+    // Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);
+    // Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,true);
+    Lab::PrintInterface::print2DContainer(inputVector.blockField);
+    Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,true);
+    
+    // int wayInd = 0;
+    // for (Lab::Way way : resultWays){
+    //     std::cout << "current Way:" << wayInd << "\n";
+    //     for (Lab::Position2D pos : way){
+    //         std::cout << "x" << pos.xPosition << " y" << pos.yPosition << "\n";
+    //     }
+    //     wayInd += 1;
     // }
+    
     // Lab::PrintInterface::print2DContainer(inputVector.blockField);
     // std::cout << tries;
     
