@@ -20,6 +20,82 @@ namespace Lab
 * return 1 if same y Coord
 * return 0 if not on Same line
 */
+
+    inline TakenPaths takePath(const Position2D fromPos, const Position2D toPos,const TakenPaths takenPaths){
+        TakenPaths resultPath(takenPaths);
+        int posDif = PositionInterface::adjacentPoint(fromPos, toPos);
+        if (posDif == 1){
+            resultPath.rightPath = true; // TODO error hier
+        }
+        else if (posDif == 2){
+            resultPath.bottomPath = true;
+        }
+        else if (posDif == 3){
+            resultPath.leftPath = true;
+        }
+        else if (posDif == 4){
+            resultPath.topPath = true;
+        }
+        // else{
+            
+        // }
+        return resultPath;
+    }
+
+    inline bool pathAlreadyTaken(const Position2D fromPos, const Position2D toPos,const TakenPaths takenPaths){
+        TakenPaths resultPath(takenPaths);
+        int posDif = PositionInterface::adjacentPoint(fromPos, toPos);
+        if (posDif == 1){
+            return resultPath.rightPath == takenPaths.rightPath;
+        }
+        else if (posDif == 2){
+            return resultPath.bottomPath == takenPaths.bottomPath;
+        }
+        else if (posDif == 3){
+            return resultPath.leftPath == takenPaths.leftPath;
+        }
+        else if (posDif == 4){
+            return resultPath.topPath == takenPaths.topPath;
+        }
+        return false;
+    }
+
+    /*
+    * calculate the relative position between fromPos and toPos and check whether the takenPaths already contain 
+    a different path 
+    */
+    inline bool differentPathAlreadyTaken(const Position2D fromPos, const Position2D toPos,const TakenPaths takenPaths){
+        TakenPaths resultPath(takenPaths);
+        int posDif = PositionInterface::adjacentPoint(fromPos, toPos);
+        if (posDif == 1){
+            //resultPath.rightPath == takenPaths.rightPath;
+            return resultPath.bottomPath || resultPath.leftPath || resultPath.topPath;
+        }
+        else if (posDif == 2){
+            //resultPath.bottomPath == takenPaths.bottomPath;
+            return resultPath.topPath || resultPath.rightPath || resultPath.leftPath;
+        }
+        else if (posDif == 3){
+            //resultPath.leftPath == takenPaths.leftPath;
+            return resultPath.topPath || resultPath.rightPath || resultPath.bottomPath;
+        }
+        else if (posDif == 4){
+            //resultPath.topPath == takenPaths.topPath;
+            return resultPath.rightPath || resultPath.leftPath || resultPath.bottomPath;
+        }
+        return false;
+    }
+
+    inline TakenPaths combinePaths(const TakenPaths path1, const TakenPaths path2){
+        TakenPaths resultPath{false,false,false,false};
+        resultPath.rightPath = path1.rightPath || path2.rightPath;
+        resultPath.leftPath = path1.leftPath || path2.leftPath;
+        resultPath.bottomPath = path1.bottomPath || path2.bottomPath;
+        resultPath.topPath = path1.topPath || path2.topPath;
+        return resultPath;
+    }
+
+
     int PositionInterface::onSameLine(const Position2D firstPos, const Position2D secondPos)
     { // make int for same y / x Position
         bool xCoord = firstPos.xPosition == secondPos.xPosition;
@@ -110,21 +186,21 @@ namespace Lab
 
 /*
 *   check that the point2 is not diagonal from the point1, but has one distance
-*     4
-*   3 0 1  
-*     2 
+*   X 4 X
+*   3 O 1  
+*   X 2 X
 */
-    int PositionInterface::adjacentPoint(const Position2D point1, const Position2D point2){
-        if (point1.xPosition == point2.xPosition + 1 && point1.yPosition == point2.yPosition){
+    int PositionInterface::adjacentPoint(const Position2D origin, const Position2D goal){
+        if (origin.xPosition + 1== goal.xPosition && origin.yPosition == goal.yPosition){
             return 1;
         }
-        else if(point1.xPosition == point2.xPosition && point1.yPosition == point2.yPosition + 1){
+        else if(origin.xPosition == goal.xPosition && origin.yPosition - 1 == goal.yPosition){
             return 2;
         }
-        else if(point1.xPosition == point2.xPosition - 1 && point1.yPosition == point2.yPosition){
+        else if(origin.xPosition - 1== goal.xPosition && origin.yPosition == goal.yPosition){
             return 3;
         }
-        else if(point1.xPosition == point2.xPosition && point1.yPosition == point2.yPosition - 1){
+        else if(origin.xPosition == goal.xPosition && origin.yPosition + 1 == goal.yPosition){
             return 4;
         }         
         return 0;
@@ -722,76 +798,138 @@ namespace Lab
         return currentWayList;
     }
 
+/*
+*   expects all positions to be connected
+* TODO solve more efficient by converting the way to a graph
+*/
     bool LabyrinthSolver::hasLoops(const Way way){
         std::vector<Position2D> jumpBackStack;
         Position2D currentPosition = way[0];
-        Position2D nextPosition;
-        
+        Position2D nextPosition;      
         //std::set<Position2D> visitedPositions{currentPosition}; // TODO maybe use a position to position to store taken
-        std::map<Position2D,int> timesVisited;
-        
-        //const auto [itPos, success] = timesVisited.insert(currentPosition,1);
-        timesVisited[currentPosition] = 1;
+        std::map<Position2D,TakenPaths> pathsVisited;
+        pathsVisited[currentPosition] = TakenPaths{false,false,false,false};
+
         // worst case run time of n*m
-        
         bool nextPositionFound = false;
-        for (auto vecIter = way.begin(); vecIter != way.end(); vecIter++) //TODO maybe sort
-        {
-
-            // // find next position which is in the way object
-            // // take point with only one distance, if there is none
+        bool jumpedBack = false;
+        TakenPaths curPath = pathsVisited[currentPosition];
+        for (auto vecIter = way.begin(); vecIter != way.end(); vecIter++){
+            // find next position which is in the way object
+            // take point with only one distance, if there is none
             nextPositionFound = false;
+            TakenPaths newPath = TakenPaths{false,false,false,false};
             for (auto vecIter2 = way.begin();vecIter2 != way.end(); vecIter2++){
-                std::cout << "curP, iter" << currentPosition << " " <<  (*vecIter2) <<  "\n";
-
-                if (!(currentPosition == (*vecIter2))){
-                    // find all reachable Positions in the way, which are only visited once
-                    if (PositionInterface::adjacentPoint(currentPosition, *vecIter2) > 0){
-                        std::cout << "are adj\n";
-                        auto foundElementIt = timesVisited.find(*vecIter2);
-                        if (foundElementIt == timesVisited.end()){ // element was not found in the map so add it with 1 appereance
-                            timesVisited[(*vecIter2)] = 1;
-                            currentPosition = (*vecIter2);
-                            break;
+                // find all reachable Positions in the way, which are only visited once
+                Position2D otherPosition = (*vecIter2);
+                if (!(currentPosition == otherPosition) && PositionInterface::adjacentPoint(currentPosition, otherPosition) > 0){
+                    std::cout << "from" << currentPosition << "to" << otherPosition <<"\n";
+                    auto foundElementIt = pathsVisited.find(otherPosition);
+                    if (foundElementIt == pathsVisited.end()){//element was not found in the map so add it with 1 appereance
+                        curPath = pathsVisited[currentPosition]; // already existing path of the current Obj
+                        newPath = takePath(currentPosition,otherPosition,newPath); // created path by going a direction
+            
+                        if (nextPositionFound){
+                            jumpBackStack.push_back(otherPosition);
                         }
-                        else{ // element was never visited
-                            if (timesVisited[*vecIter2] == 1){
-                                timesVisited[(*vecIter2)] = 2;
-                            }
-                            else{
-                                //element was already over the back position -> with two times visited a loop exists
-                                return true; 
-                            }
+                        else{
+                            nextPosition = otherPosition;
+                            nextPositionFound = true;
                         }
-                        
+                        pathsVisited[otherPosition] = mirrorPath(newPath); // the path back gets stored for the visited node
+                        pathsVisited[currentPosition] = combinePaths(curPath, newPath); // the taken path is stored
                     }
-                    // just go to the next position
-                    // if (nextPositionFound == false){
-                    //     nextPosition = *vecIter2;
-                    //     nextPositionFound = true;
-                    // }
-                    // else{
-                    //     jumpBackStack.push_back(*vecIter2);
-                    // }
+                    else{
+                        // we found a loop in the way if we come out on an already visitedPiece, from a different direction compared to before
+                        // check if thats the piece we come from
+                        //std::cout << "from" << currentPosition << "to" << otherPosition <<"\n";
+                        std::cout << "the paths" << pathsVisited[currentPosition] << "\n";
+                        //if (differentPathAlreadyTaken(currentPosition,otherPosition,pathsVisited[currentPosition])){ // not good for the jump back
+                        
+                        if (differentPathAlreadyTaken(currentPosition,otherPosition,pathsVisited[currentPosition]) && !jumpedBack ){
+                            // we already came from a different position, -> looped
+                                std::cout << "a different path was already taken\n";
+                                return true;
+                        }
+                        else{
+                            // mark the path as taken now
+                            pathsVisited[otherPosition] = takePath(otherPosition, currentPosition,pathsVisited[otherPosition]);
+                        }
+                    }
                 }
-
             }
-            // if (jumpBackStack.size() != 0){
-            //         currentPosition = jumpBackStack.back();
-            //         jumpBackStack.pop_back();
-            // }
-            // else{
-            //     currentPosition = nextPosition;
-            // }
-
-            // if (jumpBackStack.size() == 0 && !nextPositionFound){ // TODO fix for islands
-            //     return false;
-            // }
-        }     
+            if (nextPositionFound){
+                currentPosition = nextPosition;
+                jumpedBack = false;
+            } 
+            else if(jumpBackStack.size() != 0){
+                std::cout << "jumping back\n";
+                jumpedBack = true;
+                currentPosition = jumpBackStack.back();
+                jumpBackStack.pop_back();
+            }
+            else {//if (jumpBackStack.size() == 0 && nextPositionFound == false){
+                break;
+            }
+        }
         return false;
     }
 
+// expects all ways to be connected
+// find all the Positions which contribute to a a looped way, Problem the way could have multiple loops...
+// what to do then, "just" merge them
+// idea1: use edge pieces to determine where a piece belongs?
+// Way LabyrinthSolver::findLoopPositions(const Way way){
 
+
+//         Position2D currentPosition = way[0];
+//         Position2D nextPosition;
+        
+//         std::map<Position2D,int> timesVisited;
+        
+//         timesVisited[currentPosition] = 1;
+//         // worst case run time of n*m
+//         bool foundLoop = false;
+//         for (auto vecIter = way.begin(); vecIter != way.end(); vecIter++) //TODO maybe sort
+//         {
+//             if (foundLoop){
+//                 break;
+//             }
+//             // find next position which is in the way object
+//             // take point with only one distance, if there is none
+//             nextPositionFound = false;
+//             for (auto vecIter2 = way.begin();vecIter2 != way.end(); vecIter2++){
+//                 if (!(currentPosition == (*vecIter2))){
+//                     // find all reachable Positions in the way, which are only visited once
+//                     if (PositionInterface::adjacentPoint(currentPosition, *vecIter2) > 0){
+//                         auto foundElementIt = timesVisited.find(*vecIter2);
+//                         // element was never visited
+//                         if (foundElementIt == timesVisited.end()){ // element was not found in the map so add it with 1 appereance
+//                             timesVisited[(*vecIter2)] = 1;
+//                             currentPosition = (*vecIter2);
+//                             break;
+//                         }
+//                         else{
+//                             // element was visited once or twice
+//                             // if the element was visited twice already we have a loop
+//                             if (timesVisited[*vecIter2] == 1){
+//                                 timesVisited[(*vecIter2)] = 2;
+//                             }
+//                             else{
+//                                 //element was already over the back position -> with two times visited a loop exists
+//                                 timesVisited[currentPosition] = 2;
+//                                 foundLoop = true;
+//                                 break;
+//                             }
+//                         }
+                        
+//                     }
+//                 }
+//             }
+//         }     
+//         Way resultWay; // use all the nodes which were visited twice and have two adjacent PositionObjects
+//         return false;
+//     }
 
 
     Way LabyrinthSolver::findConnectedTilesSet(const Labyrinth2D lb2D){

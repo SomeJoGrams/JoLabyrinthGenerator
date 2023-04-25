@@ -29,6 +29,47 @@ namespace Lab
         return firstPos.xPosition == secondPos.xPosition && firstPos.yPosition == secondPos.yPosition;
     }
 
+    struct TakenPaths{
+        bool topPath;
+        bool rightPath;
+        bool leftPath;
+        bool bottomPath;
+    };
+
+    inline std::ostream& operator<<(std::ostream& os, const TakenPaths& path) {
+        os << "top " << path.topPath << " right " << path.rightPath << " bottom " << path.bottomPath << " left " 
+        << path.leftPath;
+        return os;
+    }
+
+
+    inline bool operator==(const TakenPaths& firstPath, const TakenPaths& secondPath){
+        return  firstPath.topPath == secondPath.topPath &&
+                firstPath.rightPath == secondPath.rightPath &&
+                firstPath.leftPath == secondPath.leftPath &&
+                firstPath.bottomPath == secondPath.bottomPath;
+    }
+
+    inline TakenPaths takePath(const Position2D fromPos, const Position2D toPos, TakenPaths takenPaths);
+
+    inline TakenPaths combinePaths(const TakenPaths path1, const TakenPaths path2);
+    
+    inline bool pathAlreadyTaken(const Position2D fromPos, const Position2D toPos,const TakenPaths takenPaths);
+    inline bool differentPathAlreadyTaken(const Position2D fromPos, const Position2D toPos,const TakenPaths takenPaths);
+
+
+    inline TakenPaths mirrorPath(TakenPaths path){
+        // switch top and bottom without local variables
+        path.topPath = path.bottomPath xor path.topPath;
+        path.bottomPath = path.topPath xor path.bottomPath;
+        path.topPath = path.bottomPath xor path.topPath;
+
+        path.rightPath = path.leftPath xor path.rightPath;
+        path.leftPath = path.rightPath xor path.leftPath;
+        path.rightPath = path.leftPath xor path.rightPath;
+        return path;
+    }
+
     // connected Positions
     struct Edge{
         Position2D firstPos;
@@ -147,7 +188,7 @@ namespace Lab
             static Way findConnectedTilesSet(const Labyrinth2D lb2D);
             static WaysVector findAllWays(const Labyrinth2D lb2D);
             static bool hasLoops(const Way way); 
-
+            static Way findLoopPositions(const Way way); 
     };
 
     struct Labyrinth3D
