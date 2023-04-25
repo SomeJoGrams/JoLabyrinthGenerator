@@ -1,24 +1,27 @@
 #define MAXTRIES 10;
 
 #include <iostream>
-#include <Labyrinths.hpp>
 #include <set>
+
+#include "Labyrinths.hpp"
+
 int main(int, char **)
 {
     const std::string fileName("test.txt");
     const std::string blackEmoji("⬛");
     const std::string whiteEmoji("⬜");
 
-    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10, 11);
-    Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
+    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10, 10);
+    //Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
 
 
-    //Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
+    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
     
-    // Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);
-    // Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,true);
-    Lab::PrintInterface::print2DContainer(inputVector.blockField);
+
+    Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);
     Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,true);
+    // Lab::PrintInterface::print2DContainer(inputVector.blockField);
+    // Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,true);
     
     // int wayInd = 0;
     // for (Lab::Way way : resultWays){

@@ -4,6 +4,7 @@
 #include <bitset>
 #include <algorithm>
 #include <set>
+#include <map>
 #include <fstream>
 #include <string>
 
@@ -66,7 +67,7 @@ namespace Lab
     }
 
     /*
-*   only right input if first pos and second pos are on same y or x Coord
+*   only right input if first pos and second pos are on same y or x Coord ( a line)
 */
     std::vector<Position2D> PositionInterface::enclosedPoints(const bool xPos, const Position2D firstPos, const Position2D secondPos)
     {
@@ -106,6 +107,30 @@ namespace Lab
         }
         return currentResultPoint;
     }
+
+/*
+*   check that the point2 is not diagonal from the point1, but has one distance
+*     4
+*   3 0 1  
+*     2 
+*/
+    int PositionInterface::adjacentPoint(const Position2D point1, const Position2D point2){
+        if (point1.xPosition == point2.xPosition + 1 && point1.yPosition == point2.yPosition){
+            return 1;
+        }
+        else if(point1.xPosition == point2.xPosition && point1.yPosition == point2.yPosition + 1){
+            return 2;
+        }
+        else if(point1.xPosition == point2.xPosition - 1 && point1.yPosition == point2.yPosition){
+            return 3;
+        }
+        else if(point1.xPosition == point2.xPosition && point1.yPosition == point2.yPosition - 1){
+            return 4;
+        }         
+        return 0;
+        
+    }
+
 
     BlockField2D Labyrinth2DGenerator::generateEmptyBlockfield(const int xSize, const int ySize)
     {
@@ -324,6 +349,42 @@ namespace Lab
             else if (currentWay.size() >= 3){
                 curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
             }
+        }
+        labCopy.blockField = curBlockField;
+        return labCopy;
+    }
+
+    Labyrinth2D Labyrinth2DGenerator::connectAllShapes(const Labyrinth2D lab2D){
+        Labyrinth2D labCopy = lab2D;
+        WaysVector freeConnectedTiles = LabyrinthSolver::findAllWays(lab2D);
+        // sort by Size
+        std::sort(freeConnectedTiles.begin(), freeConnectedTiles.end(), [&](const Way& way1,const Way& way2 ){return way1.size() < way2.size();});
+
+        // connect nearest tiles from smallest Tiles to greatest
+        BlockField2D curBlockField = labCopy.blockField;
+        Way alreadyConnectedWay = freeConnectedTiles[0];
+        for (int i= 0; i < freeConnectedTiles.size(); i++){
+            // IDEA connect randomly to a different way
+            // not freeing pieces at the border, f.e down, right at the lower edge 
+            // furthermore pieces that are already connecting other pieces(not existing walls) shouldnt be used
+            // and already connected pieces have to be taken in account
+            // for every way find a piece to connect to a way on the right
+            //Way fieldCandidates =  // positions that can be filled chosen to be connected from the alreadyConnectedWay
+            // every piece that keeps the Way loop free
+
+
+            // if (currentWay.size() == 1){
+            //     if (curIndex % 2 == 0){
+            //         curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
+            //     }
+            //     else {
+            //         curBlockField[currentWay[0].xPosition + 1][currentWay[0].yPosition] = 0;
+            //     }
+            //     curIndex += 1;
+            // }
+            // else if (currentWay.size() >= 3){
+            //     curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
+            // }
         }
         labCopy.blockField = curBlockField;
         return labCopy;
@@ -660,6 +721,78 @@ namespace Lab
         }
         return currentWayList;
     }
+
+    bool LabyrinthSolver::hasLoops(const Way way){
+        std::vector<Position2D> jumpBackStack;
+        Position2D currentPosition = way[0];
+        Position2D nextPosition;
+        
+        //std::set<Position2D> visitedPositions{currentPosition}; // TODO maybe use a position to position to store taken
+        std::map<Position2D,int> timesVisited;
+        
+        //const auto [itPos, success] = timesVisited.insert(currentPosition,1);
+        timesVisited[currentPosition] = 1;
+        // worst case run time of n*m
+        
+        bool nextPositionFound = false;
+        for (auto vecIter = way.begin(); vecIter != way.end(); vecIter++) //TODO maybe sort
+        {
+
+            // // find next position which is in the way object
+            // // take point with only one distance, if there is none
+            nextPositionFound = false;
+            for (auto vecIter2 = way.begin();vecIter2 != way.end(); vecIter2++){
+                std::cout << "curP, iter" << currentPosition << " " <<  (*vecIter2) <<  "\n";
+
+                if (!(currentPosition == (*vecIter2))){
+                    // find all reachable Positions in the way, which are only visited once
+                    if (PositionInterface::adjacentPoint(currentPosition, *vecIter2) > 0){
+                        std::cout << "are adj\n";
+                        auto foundElementIt = timesVisited.find(*vecIter2);
+                        if (foundElementIt == timesVisited.end()){ // element was not found in the map so add it with 1 appereance
+                            timesVisited[(*vecIter2)] = 1;
+                            currentPosition = (*vecIter2);
+                            break;
+                        }
+                        else{ // element was never visited
+                            if (timesVisited[*vecIter2] == 1){
+                                timesVisited[(*vecIter2)] = 2;
+                            }
+                            else{
+                                //element was already over the back position -> with two times visited a loop exists
+                                return true; 
+                            }
+                        }
+                        
+                    }
+                    // just go to the next position
+                    // if (nextPositionFound == false){
+                    //     nextPosition = *vecIter2;
+                    //     nextPositionFound = true;
+                    // }
+                    // else{
+                    //     jumpBackStack.push_back(*vecIter2);
+                    // }
+                }
+
+            }
+            // if (jumpBackStack.size() != 0){
+            //         currentPosition = jumpBackStack.back();
+            //         jumpBackStack.pop_back();
+            // }
+            // else{
+            //     currentPosition = nextPosition;
+            // }
+
+            // if (jumpBackStack.size() == 0 && !nextPositionFound){ // TODO fix for islands
+            //     return false;
+            // }
+        }     
+        return false;
+    }
+
+
+
 
     Way LabyrinthSolver::findConnectedTilesSet(const Labyrinth2D lb2D){
         Way connectedTiles = LabyrinthSolver::findConnectedTiles(lb2D);

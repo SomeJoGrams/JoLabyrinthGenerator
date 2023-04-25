@@ -15,7 +15,12 @@ namespace Lab
         long long int yPosition;
     };
 
-    inline bool operator<(const Position2D &firstPos, const Position2D &secondPos){
+    inline std::ostream& operator<<(std::ostream& os, const Position2D& position) {
+        
+        os << "xPos:" << position.xPosition << " yPos:" << position.yPosition << " ";
+        return os; }
+
+    inline bool operator<(const Position2D &firstPos, const Position2D &secondPos){ // TODO could be implemented as > for different order
         return firstPos.xPosition < secondPos.xPosition || firstPos.yPosition < secondPos.yPosition;
     }
 
@@ -24,11 +29,30 @@ namespace Lab
         return firstPos.xPosition == secondPos.xPosition && firstPos.yPosition == secondPos.yPosition;
     }
 
+    // connected Positions
+    struct Edge{
+        Position2D firstPos;
+        Position2D secondPos;
+    };
+
+    // sorted like a 2D field
+    inline bool operator<(const Edge &firstEdge, const Edge &secondEdge){
+        return firstEdge.firstPos < secondEdge.firstPos || firstEdge.secondPos < secondEdge.secondPos;
+    }
+
+
+    inline bool operator==(const Edge &firstEdge, const Edge &secondEdge)
+    {
+        return (firstEdge.firstPos == secondEdge.firstPos && firstEdge.secondPos == secondEdge.secondPos ) ||
+                (firstEdge.firstPos == secondEdge.secondPos && firstEdge.secondPos == secondEdge.firstPos);
+    }
+
+
     using BlockField2D = std::vector<std::vector<bool>>;
     /* TODO is that bad abstraction? */
     using Way = std::vector<Position2D>;
     using WaysVector = std::vector<Way>;
-    
+
     struct Labyrinth2D
     {
         Position2D startPosition;
@@ -59,6 +83,7 @@ namespace Lab
         static int onSameLine(const Position2D firstPos, const Position2D secondPos);
         static bool betweenTwoPoints(const Position2D point, const Position2D firstPos, const Position2D secondPos);
         static long long int pointDistance(const Position2D point1, const Position2D point2);
+        static int adjacentPoint(const Position2D point1, const Position2D point2);
         static std::vector<Position2D> enclosedPoints(const bool xPos, const Position2D firstPos, const Position2D secondPos);
         static Position2D nearestPoint(const Position2D point, const Way severalPoints);
     };
@@ -83,9 +108,17 @@ namespace Lab
         void clearCurrentWalk();
     };
 
+
+    static Way combineWays(const Way firstWay, const Way secondWay){
+        Way resultWay = firstWay;
+        resultWay.insert(resultWay.begin(),secondWay.begin(),secondWay.end());
+        return resultWay;
+    }
+
+
     /*
 *   should be able to fill Spaces based on a Pattern
-*   
+*
 *
 */
     class Labyrinth2DGenerator
@@ -100,6 +133,8 @@ namespace Lab
         static BlockField2D firstLabAlgorithm(std::vector<std::vector<int>> blockField);
         static BlockField2D generateEmptyBlockfield(const int xSize, const int ySize);
         static Labyrinth2D connectSomeShapes(const Labyrinth2D lab2D);
+        static Labyrinth2D connectAllShapes(const Labyrinth2D lab2D);
+
         static Labyrinth2D depthSearchLabyrinth(const Labyrinth2D lab2d);
     };
 
@@ -111,6 +146,7 @@ namespace Lab
             static Way findWay(const Labyrinth2D lb2D);
             static Way findConnectedTilesSet(const Labyrinth2D lb2D);
             static WaysVector findAllWays(const Labyrinth2D lb2D);
+            static bool hasLoops(const Way way); 
 
     };
 
