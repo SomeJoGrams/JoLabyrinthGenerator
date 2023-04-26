@@ -14,19 +14,20 @@ int main(int, char **)
     Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10, 10);
     //Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
 
- Lab::Way curWay{Lab::Position2D{0,0},Lab::Position2D{0,1},
-                                     Lab::Position2D{0,2},
-                                    //  Lab::Position2D{0,3},
-                                     Lab::Position2D{1,0},
-                                     Lab::Position2D{2,0},
-                                     Lab::Position2D{2,1},
-                                     Lab::Position2D{2,2}, 
-                                     Lab::Position2D{1,2}};
+//  Lab::Way curWay{Lab::Position2D{0,0},Lab::Position2D{0,1},
+//                                      Lab::Position2D{0,2},
+//                                     //  Lab::Position2D{0,3},
+//                                      Lab::Position2D{1,0},
+//                                      Lab::Position2D{2,0},
+//                                      Lab::Position2D{2,1},
+//                                      Lab::Position2D{2,2}, 
+//                                      Lab::Position2D{1,2}};
 
-    bool hasLoops = Lab::LabyrinthSolver::hasLoops(curWay);
-    std::cout << "hasLoops?" << hasLoops << "n";
+    // bool hasLoops = Lab::LabyrinthSolver::hasLoops(curWay);
+    // std::cout << "hasLoops?" << hasLoops << "n";
 
-    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
+    //Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
+    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectAllShapes(inputVector);
     
 
     Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);

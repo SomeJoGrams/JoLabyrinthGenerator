@@ -413,6 +413,11 @@ namespace Lab
         BlockField2D curBlockField = labCopy.blockField;
         int curIndex = 0;
         for (Way currentWay : freeConnectedTiles){
+            // bool nearRightEnd = 
+            // if (nearRightEnd){
+            //     // connect to the left
+            // }
+            //else 
             if (currentWay.size() == 1){
                 if (curIndex % 2 == 0){
                     curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
@@ -438,17 +443,45 @@ namespace Lab
 
         // connect nearest tiles from smallest Tiles to greatest
         BlockField2D curBlockField = labCopy.blockField;
-        Way alreadyConnectedWay = freeConnectedTiles[0];
-        for (int i= 0; i < freeConnectedTiles.size(); i++){
+        //Way alreadyConnectedWay = freeConnectedTiles[0];
+        std::set<Position2D> replacePositions;
+        //for (int i= 0; i < freeConnectedTiles.size() - 1; i++){
+        
+        for (auto tilesIt = freeConnectedTiles.cbegin(); tilesIt != freeConnectedTiles.cend(); tilesIt++)
+        {
+            // idea every way needs 1 piece except one way
             // IDEA connect randomly to a different way
             // not freeing pieces at the border, f.e down, right at the lower edge 
             // furthermore pieces that are already connecting other pieces(not existing walls) shouldnt be used
             // and already connected pieces have to be taken in account
             // for every way find a piece to connect to a way on the right
-            //Way fieldCandidates =  // positions that can be filled chosen to be connected from the alreadyConnectedWay
-            // every piece that keeps the Way loop free
+            Way positions;
+            for (const Position2D pos : (*tilesIt)){
+                if (pos.xPosition % 2 == 1 && pos.yPosition % 2 == 1){ // the rows and colums are only on uneven positions!
+                    // extend the border by 1 to not take additional positions on the border
+                    Way neighbors = LabyrinthSolver::freeNeighbors(curBlockField,pos,1);
+                    positions.insert(positions.end(), neighbors.begin(), neighbors.end());
+                    // std::cout << "looked for neightbors for " << pos <<"\n";
+                    // for (auto pos1 : neighbors){
+                    //     std::cout << "neighbour" << pos1 << "\n";
+                    // }
+                    // look at all positions and only take a unique position
 
-
+                }
+            }
+            int ind = 0;
+            // only insert unique positions, which connect to a new island
+            if (positions.size() != 0){
+                while (replacePositions.find(positions[ind]) != replacePositions.end()){ 
+                    ind += 1;
+                }
+                replacePositions.insert(positions[ind]);
+            }
+        }
+        for (Position2D pos : replacePositions){
+//            std::cout << "taken position" << pos << "\n";
+            curBlockField[pos.xPosition][pos.yPosition] = 0;
+        }
             // if (currentWay.size() == 1){
             //     if (curIndex % 2 == 0){
             //         curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
@@ -461,7 +494,7 @@ namespace Lab
             // else if (currentWay.size() >= 3){
             //     curBlockField[currentWay[0].xPosition][currentWay[0].yPosition + 1] = 0;
             // }
-        }
+        
         labCopy.blockField = curBlockField;
         return labCopy;
     }
@@ -873,6 +906,33 @@ namespace Lab
             }
         }
         return false;
+    }
+
+    Way LabyrinthSolver::freeNeighbors(const BlockField2D field, const Position2D position,const int extendBorder){
+        Way resultPositions;
+        auto xPosition = position.xPosition;
+        auto yPosition = position.yPosition;
+
+        //TODO make extend border template or planning
+
+        auto xLowerBorder = 0 + extendBorder;
+        auto xUpperBorder = field.size() - 1 - extendBorder;
+        auto yLowerBorder = 0 + extendBorder;
+        auto yUpperBorder = field[0].size() - 1 - extendBorder;
+
+        if (field[xPosition + 1][yPosition] == 1 && xPosition + 1 < xUpperBorder){
+            resultPositions.push_back(Position2D{xPosition + 1,yPosition});
+        }
+        if (field[xPosition - 1][yPosition] == 1 && xPosition > xLowerBorder){
+            resultPositions.push_back(Position2D{xPosition - 1,yPosition});
+        }
+        if (field[xPosition][yPosition + 1] == 1 && yPosition + 1 < yUpperBorder){
+            resultPositions.push_back(Position2D{xPosition,yPosition + 1});           
+        }
+        if (field[xPosition][yPosition - 1] == 1 && yPosition > yLowerBorder){
+            resultPositions.push_back(Position2D{xPosition,yPosition - 1});           
+        }
+        return resultPositions;
     }
 
 // expects all ways to be connected

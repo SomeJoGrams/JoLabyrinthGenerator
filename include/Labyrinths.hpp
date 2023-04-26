@@ -89,7 +89,7 @@ namespace Lab
     }
 
 
-    using BlockField2D = std::vector<std::vector<bool>>;
+    using BlockField2D = std::vector<std::vector<bool>>; // first x coordiante then y coordinate
     /* TODO is that bad abstraction? */
     using Way = std::vector<Position2D>;
     using WaysVector = std::vector<Way>;
@@ -188,7 +188,8 @@ namespace Lab
             static Way findConnectedTilesSet(const Labyrinth2D lb2D);
             static WaysVector findAllWays(const Labyrinth2D lb2D);
             static bool hasLoops(const Way way); 
-            static Way findLoopPositions(const Way way); 
+            //static Way findLoopPositions(const Way way); 
+            static Way freeNeighbors(const BlockField2D field, const Position2D position,const int extendBorder);
     };
 
     struct Labyrinth3D
