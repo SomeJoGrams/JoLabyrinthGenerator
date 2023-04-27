@@ -21,7 +21,14 @@ namespace Lab
         return os; }
 
     inline bool operator<(const Position2D &firstPos, const Position2D &secondPos){ // TODO could be implemented as > for different order
-        return firstPos.xPosition < secondPos.xPosition || firstPos.yPosition < secondPos.yPosition;
+        // first sort by y Position then by x Position...
+        if (firstPos.yPosition < secondPos.yPosition){
+            return true;
+        }
+        else if (firstPos.yPosition == secondPos.yPosition){
+            return firstPos.xPosition < secondPos.xPosition;
+        }
+        return false;
     }
 
     inline bool operator==(const Position2D &firstPos, const Position2D &secondPos)
@@ -103,6 +110,7 @@ namespace Lab
 
     enum class Pattern
     {
+        nothing,
         random,
         insideOut,
         outsideIn,
@@ -127,6 +135,8 @@ namespace Lab
         static int adjacentPoint(const Position2D point1, const Position2D point2);
         static std::vector<Position2D> enclosedPoints(const bool xPos, const Position2D firstPos, const Position2D secondPos);
         static Position2D nearestPoint(const Position2D point, const Way severalPoints);
+        static bool adjacentToWay(const Position2D point, const Way way);
+        static int timesAdjacentToWay(const Position2D point, const Way severalPoints);
     };
 
     // struct BlockField2D{
@@ -174,6 +184,7 @@ namespace Lab
         static BlockField2D firstLabAlgorithm(std::vector<std::vector<int>> blockField);
         static BlockField2D generateEmptyBlockfield(const int xSize, const int ySize);
         static Labyrinth2D connectSomeShapes(const Labyrinth2D lab2D);
+        static Labyrinth2D connectSomeShapes2(const Labyrinth2D lab2D);
         static Labyrinth2D connectAllShapes(const Labyrinth2D lab2D);
 
         static Labyrinth2D depthSearchLabyrinth(const Labyrinth2D lab2d);
@@ -183,13 +194,20 @@ namespace Lab
     {
         private:
             static Way findConnectedTiles(const Labyrinth2D lb2D);
+            static Way findConnectedTiles(const BlockField2D blockField, Position2D startPosition);
+
         public:
             static Way findWay(const Labyrinth2D lb2D);
             static Way findConnectedTilesSet(const Labyrinth2D lb2D);
+            static Way findConnectedTilesSet(const BlockField2D blockField,Position2D startPosition);
             static WaysVector findAllWays(const Labyrinth2D lb2D);
+            static WaysVector findAllWays(const BlockField2D lb2D);
             static bool hasLoops(const Way way); 
             //static Way findLoopPositions(const Way way); 
             static Way freeNeighbors(const BlockField2D field, const Position2D position,const int extendBorder);
+            static Way freeNeighborsDifferentIsland(const BlockField2D field, const Way island,const Position2D position,const int extendBorder);
+            static Way newCombinedIsland(const BlockField2D field, const Way island,const Position2D position,const int extendBorder);
+
     };
 
     struct Labyrinth3D
