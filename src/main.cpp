@@ -12,8 +12,7 @@ int main(int, char **)
     const std::string whiteEmoji("⬜");
 
 
-    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 50,50);
-    
+    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 15,15);
     
     //Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
 

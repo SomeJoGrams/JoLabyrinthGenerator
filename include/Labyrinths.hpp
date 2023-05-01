@@ -67,13 +67,20 @@ namespace Lab
 
     inline TakenPaths mirrorPath(TakenPaths path){
         // switch top and bottom without local variables
-        path.topPath = path.bottomPath xor path.topPath;
-        path.bottomPath = path.topPath xor path.bottomPath;
-        path.topPath = path.bottomPath xor path.topPath;
+        // path.topPath = path.bottomPath xor path.topPath;
+        // path.bottomPath = path.topPath xor path.bottomPath;
+        // path.topPath = path.bottomPath xor path.topPath;
 
-        path.rightPath = path.leftPath xor path.rightPath;
-        path.leftPath = path.rightPath xor path.leftPath;
-        path.rightPath = path.leftPath xor path.rightPath;
+        // path.rightPath = path.leftPath xor path.rightPath;
+        // path.leftPath = path.rightPath xor path.leftPath;
+        // path.rightPath = path.leftPath xor path.rightPath;
+        path.topPath = path.bottomPath ^ path.topPath;
+        path.bottomPath = path.topPath ^ path.bottomPath;
+        path.topPath = path.bottomPath ^ path.topPath;
+
+        path.rightPath = path.leftPath ^ path.rightPath;
+        path.leftPath = path.rightPath ^ path.leftPath;
+        path.rightPath = path.leftPath ^ path.rightPath;
         return path;
     }
 

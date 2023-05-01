@@ -508,8 +508,11 @@ namespace Lab
                     // look at all positionCandidates and only take a unique position
                 }
             }
-            std::uniform_int_distribution<> distr(0, positionCandidates.size() - 1);
-            int ind = distr(ranGenerator64); // calculate a random start index
+            int ind = 0;
+            if (positionCandidates.size() > 1){
+                std::uniform_int_distribution<> distr(0, positionCandidates.size() - 1);
+                ind = distr(ranGenerator64); // calculate a random start index
+            }
             // only insert unique positionCandidates, which connect to a new island
             int maxTries = positionCandidates.size() - 1;
             if (positionCandidates.size() != 0){
@@ -571,13 +574,17 @@ namespace Lab
             for (const Position2D pos : resultIsland){
                 if (pos.xPosition % 2 == 1 && pos.yPosition % 2 == 1){ // the rows and colums are only on uneven positions!
                     // extend the border by 1 to not take additional positions on the border
-                    Way neighbors = LabyrinthSolver::freeNeighborsDifferentIsland(curBlockField,resultIsland,pos,1);
+                    // O(islands * posIn * posAll * ) 
+                    Way neighbors = LabyrinthSolver::freeNeighborsDifferentIsland(curBlockField,resultIsland,pos,1); 
                     positionCandidates.insert(positionCandidates.end(), neighbors.begin(), neighbors.end());
                     // look at all positionCandidates and only take a unique position
                 }
             }
-            std::uniform_int_distribution<> distr(0, positionCandidates.size() - 1);
-            int ind = distr(ranGenerator64); // calculate a random start index
+            int ind = 0;
+            if (positionCandidates.size() > 1){
+                std::uniform_int_distribution<> distr(0, positionCandidates.size() - 1);
+                ind = distr(ranGenerator64); // calculate a random start index
+            }
             // only insert unique positionCandidates, which connect to a new island
             int maxTries = positionCandidates.size() - 1;
             if (positionCandidates.size() != 0){
@@ -597,6 +604,7 @@ namespace Lab
                 Position2D choosenCandidate = positionCandidates[ind];
                 curBlockField[choosenCandidate.xPosition][choosenCandidate.yPosition] = 0;
             }
+            // o(N * M), 
             freeConnectedTiles = LabyrinthSolver::findAllWays(curBlockField);// find all islands again // TODO remove this call 
             resultIsland = freeConnectedTiles[0];
         }
@@ -628,7 +636,7 @@ namespace Lab
         // open the fileStream
         // convert to utf code by (\U+2B1B) 1. remove "+", 2. backslash before U 3. replace + with 3 zero
         //std::fstream fileStream(fileName, fileStream.trunc | fileStream.out);
-        std::fstream fileStream(fileName, fileStream.trunc | fileStream.out);
+        std::fstream fileStream{fileName, fileStream.trunc | fileStream.out};
         // stop print if file cant be opened
         if (!fileStream.is_open()){
             std::cout << "couldnt open the file";
@@ -660,7 +668,7 @@ namespace Lab
     {
         // open the fileStream
         // convert to utf code by (\U+2B1B) 1. remove "+", 2. backslash before U 3. replace + with 3 zero
-        std::fstream fileStream(fileName, fileStream.trunc | fileStream.out);
+        std::fstream fileStream{fileName, fileStream.trunc | fileStream.out};
         // stop print if file cant be opened
         if (!fileStream.is_open()){
             std::cout << "couldnt open the file";

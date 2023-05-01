@@ -1,0 +1,60 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "FirstPreset",
+            "displayName": "Configure preset using toolchain file",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "value": "$env{CMAKE_TOOLCHAIN_FILE}",
+                    "type": "FILEPATH"
+                },
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "name": "BasicPresetGCC-x64",
+            "description": "",
+            "displayName": "",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "inherits": [
+                "FirstPreset"
+            ]
+        },
+        {
+            "name": "BasicPresetCL-x64",
+            "description": "",
+            "displayName": "",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl",
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "inherits": [
+                "FirstPreset"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "x64-release",
+            "displayName": "x64 Release",
+            "description": "release configuration",
+            "inherits": "BasicPreset-x64"
+        },
+        {
+            "name": "FirstBuildPreset",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "FirstPreset"
+        }
+    ]
+}
