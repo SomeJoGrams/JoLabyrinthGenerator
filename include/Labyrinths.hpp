@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <map>
 
 
 namespace Lab
@@ -193,6 +194,8 @@ namespace Lab
         static Labyrinth2D connectSomeShapes(const Labyrinth2D lab2D);
         static Labyrinth2D connectSomeShapes2(const Labyrinth2D lab2D);
         static Labyrinth2D connectAllShapes(const Labyrinth2D lab2D);
+        static Labyrinth2D connectAllShapes2(const Labyrinth2D lab2D);
+        
 
         static Labyrinth2D depthSearchLabyrinth(const Labyrinth2D lab2d);
     };
@@ -208,12 +211,16 @@ namespace Lab
             static Way findConnectedTilesSet(const Labyrinth2D lb2D);
             static Way findConnectedTilesSet(const BlockField2D blockField,Position2D startPosition);
             static WaysVector findAllWays(const Labyrinth2D lb2D);
-            static WaysVector findAllWays(const BlockField2D lb2D);
+            static WaysVector findAllWays(const BlockField2D blockfield);
+            static WaysVector findAllWays2(const BlockField2D blockfield);
+            
             static bool hasLoops(const Way way); 
             //static Way findLoopPositions(const Way way); 
             static Way freeNeighbors(const BlockField2D field, const Position2D position,const int extendBorder);
             static Way freeNeighborsDifferentIsland(const BlockField2D field, const Way island,const Position2D position,const int extendBorder);
             static Way newCombinedIsland(const BlockField2D field, const Way island,const Position2D position,const int extendBorder);
+            static std::vector<std::pair<Position2D,int>> connectableIslandIndices(const BlockField2D& field
+                     ,const std::map<Position2D,int>& posToSet,const std::map<int,int>& setIndexToIsland ,const Position2D& position,const int extendBorder);
 
     };
 

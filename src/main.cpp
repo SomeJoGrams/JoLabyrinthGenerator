@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <set>
+#include <chrono>
 
 #include "Labyrinths.hpp"
 
@@ -11,9 +12,12 @@ int main(int, char **)
     const std::string blackEmoji("⬛");
     const std::string whiteEmoji("⬜");
 
+    auto start = std::chrono::steady_clock::now();
+    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 100,100);
+    auto end = std::chrono::steady_clock::now();
 
-    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 15,15);
-    
+    std::chrono::duration<double> generationTime = end-start;
+
     //Lab::WaysVector resultWays = Lab::LabyrinthSolver::findAllWays(inputVector);
 
 //  Lab::Way curWay{Lab::Position2D{0,0},Lab::Position2D{0,1},
@@ -46,13 +50,27 @@ int main(int, char **)
     // bool hasLoops = Lab::LabyrinthSolver::hasLoops(curWay);
     // std::cout << "hasLoops?" << hasLoops << "n";
 
+
+
+    start = std::chrono::steady_clock::now();
     //Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
-    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectAllShapes(inputVector);
-    
+    Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectAllShapes2(inputVector);
+    end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> connectTime = end-start;
+
+    // start = std::chrono::steady_clock::now();
+    // //Lab::Labyrinth2D fixedLabyrinth = Lab::Labyrinth2DGenerator::connectSomeShapes(inputVector);
+    // fixedLabyrinth = Lab::Labyrinth2DGenerator::connectAllShapes(inputVector);
+    // end = std::chrono::steady_clock::now();
+    // std::chrono::duration<double> connectTime2 = end-start;
+
 
     Lab::PrintInterface::print2DContainer(fixedLabyrinth.blockField);
     Lab::PrintInterface::print2DLabyrinthToFile(fileName,inputVector.blockField, fixedLabyrinth.blockField, blackEmoji, whiteEmoji,false);
    
+    std::cout << "generation of the base labyrinth took " << generationTime.count() << "s\n";
+    std::cout << "generation of the connected labyrinth took " << connectTime.count() << "s\n";
+    //std::cout << "generation of the old connected labyrinth took " << connectTime2.count() << "s\n"; // takes way too long bc of repeated field search!
    
    
     // Lab::PrintInterface::print2DContainer(inputVector.blockField);

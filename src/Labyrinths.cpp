@@ -407,7 +407,7 @@ namespace Lab
         }
 
         std::random_device rd;
-        std::mt19937_64 ranGenerator64{rd()};
+        std::mt19937_64 ranGenerator64(rd());
         std::uniform_int_distribution<> distr(0, 1);
 
         const Position2D startPosition{xSize / 2, ySize / 2};
@@ -484,7 +484,7 @@ namespace Lab
         std::set<Position2D> replacePositions;
         //for (int i= 0; i < freeConnectedTiles.size() - 1; i++){
         std::random_device rd;
-        std::mt19937_64 ranGenerator64{rd()};
+        std::mt19937_64 ranGenerator64(rd());
         for (auto tilesIt = freeConnectedTiles.cbegin(); tilesIt != freeConnectedTiles.cend(); tilesIt++) // the tiles of the vector, a ways vector
         {
             // idea every way needs 1 piece except one way
@@ -562,14 +562,12 @@ namespace Lab
         std::set<Position2D> replacePositions;
 
         std::random_device rd;
-        std::mt19937_64 ranGenerator64{rd()};
+        std::mt19937_64 ranGenerator64(rd());
         Way resultIsland = freeConnectedTiles[0];
 
         Way positionCandidates;
         // std::cout << "connected size" << freeConnectedTiles.size() << "\n";
         for (int islandConnection = 0; islandConnection <= islandRepititions; islandConnection++){
-            // std::cout << "cur Run" << islandConnection << "\n";
-
             positionCandidates = Way();
             for (const Position2D pos : resultIsland){
                 if (pos.xPosition % 2 == 1 && pos.yPosition % 2 == 1){ // the rows and colums are only on uneven positions!
@@ -587,9 +585,9 @@ namespace Lab
             }
             // only insert unique positionCandidates, which connect to a new island
             int maxTries = positionCandidates.size() - 1;
-            if (positionCandidates.size() != 0){
+            if (positionCandidates.size() != 0){ 
                 // if the position is already inserted find a different one
-                while (replacePositions.find(positionCandidates[ind]) != replacePositions.end()){ 
+                while (replacePositions.find(positionCandidates[ind]) != replacePositions.end()){  // TODO fix this always return false
                     if (ind == positionCandidates.size() - 1){
                         ind = 0;
                     }
@@ -611,7 +609,93 @@ namespace Lab
             
         labCopy.blockField = curBlockField;
         return labCopy;
-        } 
+    } 
+
+    // TODO implement the merge part with divide and conquer, or more efficient
+    // TODO remove int type
+    // TODO simplify the set and island indices
+    Labyrinth2D Labyrinth2DGenerator::connectAllShapes2(const Labyrinth2D lab2D){
+        Labyrinth2D labCopy = lab2D;
+        WaysVector freeConnectedTiles = LabyrinthSolver::findAllWays(lab2D);
+        // idea map a set index to positions
+        // and the set index  to islands to allow merging of positions
+
+        // set indices are the indices in free connected Tiles
+
+        using setIndex = int;
+        using islandIndex = int;
+
+        std::map<setIndex,islandIndex> setIndexToIslandIndex; // TODO just use an array
+        std::map<Position2D,setIndex> posToSet;
+
+
+        int indexOrigIsland = 0; // during initialization the islands are all in the set, that is equal to the island index
+        for (const Way &w :freeConnectedTiles){
+            setIndexToIslandIndex.emplace(indexOrigIsland,indexOrigIsland);
+            for (const Position2D &pos: w){
+                posToSet.emplace(pos, indexOrigIsland); // TODO only take necessary tiles
+            }
+            indexOrigIsland += 1;
+        }
+
+        const int islandRepititions = freeConnectedTiles.size() - 1;
+        BlockField2D curBlockField = labCopy.blockField;
+
+
+        std::random_device rd;
+        std::mt19937_64 ranGenerator64(rd());
+        //Way resultIsland = freeConnectedTiles[0];
+
+        std::vector<setIndex> connectedSets{0};
+
+        // holds the positions and the island which can get connected
+        std::vector<std::pair<Position2D,islandIndex>> positionCandidates; 
+        std::vector<std::pair<Position2D,islandIndex>> newPositions;
+        for (int islandConnection = 0; islandConnection <= islandRepititions; islandConnection++){
+            positionCandidates = std::vector<std::pair<Position2D,islandIndex>>();
+            //for (const setIndex index : connectedSets){
+                // std::cout << "checking island " << index << "\n";
+                //Way island = freeConnectedTiles[setIndexToIslandIndex[index]];
+            Way island = freeConnectedTiles[0];
+            for (const Position2D &pos : island){
+                if (pos.xPosition % 2 == 1 && pos.yPosition % 2 == 1){ // the rows and colums are only on uneven positions!
+                    // extend the border by 1 to not take additional positions on the border
+                    // O(islands * posIn * posAll * )
+                    // the neightbors to any piece in the labyrinth
+                    //Way neighbors = LabyrinthSolver::freeNeighborsDifferentIsland(curBlockField,resultIsland,pos,1);// TODO use graphs for constant lookup O(4)
+                    //islandIndex = LabyrinthSolver::newCombinedIsland(curBlockField,freeConnectedTiles,pos,1);                   
+                    newPositions = LabyrinthSolver::connectableIslandIndices(curBlockField,posToSet,setIndexToIslandIndex,pos,1);
+                    // look at all positionCandidates and only take an unique position
+            }
+            positionCandidates.insert(positionCandidates.end(), newPositions.begin(), newPositions.end());
+            // }
+            }
+            // the taken indices are already unique and connect to a new island, just take one randomly
+            int ind = 0;
+            if (positionCandidates.size() > 1){
+                std::uniform_int_distribution<> distr(0, positionCandidates.size() - 1);
+                ind = distr(ranGenerator64); // calculate a random start index
+            }
+            if (positionCandidates.size() != 0){
+                //while() // check that the point connect to a new island
+                Position2D choosenCandidate = positionCandidates[ind].first;
+                curBlockField[choosenCandidate.xPosition][choosenCandidate.yPosition] = 0;
+                int choosenCandidateIslandIndex = setIndexToIslandIndex[positionCandidates[ind].second];
+                // include the new tiles in the main island
+                freeConnectedTiles[0].insert(freeConnectedTiles[0].end(),freeConnectedTiles[choosenCandidateIslandIndex].begin(),freeConnectedTiles[choosenCandidateIslandIndex].end());
+                setIndexToIslandIndex[positionCandidates[ind].second] = 0; // update the island, the positions of the other island are added to the main island by this
+                                                                        // this is done by setting the set reference to the island
+                connectedSets.push_back(positionCandidates[ind].second); // the positions of the set to the selection
+            }
+            // O(N * M), 
+            // update the set indices
+
+            // just connect to the setIndex of the first island
+            
+        }
+        labCopy.blockField = curBlockField;
+        return labCopy;
+    }
 
 
     template <typename Val>
@@ -721,7 +805,7 @@ namespace Lab
     int RandomWalk::generateStep()
     {
         std::random_device rd;
-        std::mt19937_64 ranGenerator64{rd()};
+        std::mt19937_64 ranGenerator64(rd());
         std::uniform_int_distribution<> distr(0, 99);
         if (distr(ranGenerator64) >= randomStepObject.posValueAccept)
         { // checks if randomNumber is greater than the positiveValue, with posValueAccept == 99 -> no values accepted, with == 0 -> all values
@@ -739,7 +823,7 @@ namespace Lab
     int RandomWalk::generateStepWithinRange(int startPosition, int startRange, int endRange)
     {
         std::random_device rd;
-        std::mt19937_64 ranGenerator64{rd()};
+        std::mt19937_64 ranGenerator64(rd());
         std::uniform_int_distribution<> distr(0, 99);
         int fitToRange(0);
         currentWalkPosition = startPosition;
@@ -1081,35 +1165,78 @@ namespace Lab
         return resultPositions;
     }
 
-    Way LabyrinthSolver::newCombinedIsland(const BlockField2D field,const Way island, const Position2D position,const int extendBorder){
-        Way resultPositions;
+    //TODO make extend border template or planning
+    // TODO replace int
+    // return the position and the set to which it belongs
+    std::vector<std::pair<Position2D,int>> LabyrinthSolver::connectableIslandIndices(const BlockField2D& field
+        ,const std::map<Position2D,int>& posToSet,const std::map<int,int>& setIndexToIsland,const Position2D& position,const int extendBorder)
+        {
+        std::vector<std::pair<Position2D,int>> resultPositions;
         auto xPosition = position.xPosition;
         auto yPosition = position.yPosition;
 
-        //TODO make extend border template or planning
 
         auto xLowerBorder = 0 + extendBorder;
         auto xUpperBorder = field.size() - 1 - extendBorder;
         auto yLowerBorder = 0 + extendBorder;
         auto yUpperBorder = field[0].size() - 1 - extendBorder;
-        std::cout << "upper border" << yUpperBorder << field[xPosition][yPosition + 1];
+        //std::cout << "upper border" << yUpperBorder << field[xPosition][yPosition + 1];
 
         const Position2D positiveX{xPosition + 1,yPosition};
         const Position2D negativeX{xPosition - 1,yPosition};
         const Position2D positiveY{xPosition, yPosition + 1};
         const Position2D negativeY{xPosition, yPosition - 1};
-        if (field[xPosition + 1][yPosition] == 1 && xPosition + 1 < xUpperBorder && (PositionInterface::timesAdjacentToWay(positiveX,island) == 1)){
-            resultPositions.push_back(positiveX);
+        // only insert if posToSet is different to that of the original position
+        
+        int originalSetIndex = posToSet.at(position);
+        int originalIslandIndex = setIndexToIsland.at(originalSetIndex);
+        int setIndex(0);
+        int islandIndex(0);
+        if (field[xPosition + 1][yPosition] == 1 && xPosition + 2 <= xUpperBorder){
+            // from a connecting Position only a position further to the right can be set
+            const Position2D curPos{xPosition + 1 + 1, yPosition};
+            setIndex = posToSet.at(curPos);
+            islandIndex = setIndexToIsland.at(setIndex);
+            // only add positions which connect to a different island
+            if (islandIndex != originalIslandIndex){
+                resultPositions.push_back(std::make_pair(positiveX, setIndex));
+            }
         }
-        if (field[xPosition - 1][yPosition] == 1 && xPosition > xLowerBorder && (PositionInterface::timesAdjacentToWay(negativeX,island) == 1)){
-            resultPositions.push_back(negativeX);
+        // analog for the other positions
+        if (field[xPosition - 1][yPosition] == 1 && xPosition - 1 > xLowerBorder){
+            setIndex = posToSet.at(Position2D{xPosition - 1 - 1, yPosition});
+            // only add positions which connect to a different island
+            islandIndex = setIndexToIsland.at(setIndex);
+            if (islandIndex != originalIslandIndex){
+                resultPositions.push_back(std::make_pair(negativeX, setIndex));
+            }
         }
-        if (field[xPosition][yPosition + 1] == 1 && yPosition + 1 < yUpperBorder && (PositionInterface::timesAdjacentToWay(positiveY,island) == 1)){
-            resultPositions.push_back(positiveY);
+
+        if (field[xPosition][yPosition + 1] == 1 && yPosition + 2 <= yUpperBorder){
+            setIndex = posToSet.at(Position2D{xPosition, yPosition + 1 + 1});
+            islandIndex = setIndexToIsland.at(setIndex);
+            if (islandIndex != originalIslandIndex){
+            // only add positions which connect to a different island
+                resultPositions.push_back(std::make_pair(positiveY, setIndex));
+            }
         }
-        if (field[xPosition][yPosition - 1] == 1 && yPosition > yLowerBorder && (PositionInterface::timesAdjacentToWay(negativeY,island) == 1)){
-            resultPositions.push_back(negativeY);
+
+        if (field[xPosition][yPosition - 1] == 1 && yPosition - 1 > yLowerBorder){
+            setIndex = posToSet.at(Position2D{xPosition, yPosition - 1 - 1});
+            // only add positions which connect to a different island
+            islandIndex = setIndexToIsland.at(setIndex);
+            if (islandIndex != originalIslandIndex){
+                resultPositions.push_back(std::make_pair(negativeY, setIndex));
+            }
         }
+        // if (resultPositions.size() != 0){
+        //     std::cout << "startPos" << position << ":";
+        //     for (auto &[pos, set] : resultPositions){
+        //         std::cout << "found positions" << pos << ",";
+        //     }
+        //     std::cout << "\n\n";
+        // }
+
         return resultPositions;
     }
 
@@ -1225,6 +1352,31 @@ namespace Lab
     }
 
     WaysVector LabyrinthSolver::findAllWays(const BlockField2D blockField){
+        WaysVector result;
+        BlockField2D curBlockField = blockField;// the blockfield that will be edited
+        Position2D curStartPosition{1,1};//copiedLabyrinth.startPosition;
+        // for (auto vecIter =(constCopy.blockField).begin(); vecIter != (constCopy.blockField).end(); vecIter++)
+        // {
+        for (auto indexXCoord = 1; indexXCoord <= curBlockField.size() - 2; indexXCoord++)
+        {
+            for (auto indexYCoord = 1; indexYCoord <= curBlockField.size() - 2; indexYCoord++)
+            {
+            // auto indexXCoord = vecIter - (constCopy.blockField).begin();
+            // for (auto bitIter = (*vecIter).begin(); bitIter != (*vecIter).end(); bitIter++)
+            // {
+                // auto indexYCoord = bitIter - (*vecIter).begin()++;
+                if (curBlockField[indexXCoord][indexYCoord] == 0){ // free field
+                    curStartPosition = Position2D{indexXCoord, indexYCoord};
+                    Way currentWay = findConnectedTilesSet(curBlockField,curStartPosition);
+                    curBlockField = Lab::Labyrinth2DGenerator::fillPoints(curBlockField, currentWay, 1); // fill found fields
+                    result.push_back(currentWay);
+                }
+            }
+        }
+        return result;
+    }
+
+    WaysVector LabyrinthSolver::findAllWays2(const BlockField2D blockField){
         WaysVector result;
         BlockField2D curBlockField = blockField;// the blockfield that will be edited
         Position2D curStartPosition{1,1};//copiedLabyrinth.startPosition;
