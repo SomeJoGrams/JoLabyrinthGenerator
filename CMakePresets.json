@@ -25,6 +25,10 @@
                 "CMAKE_CXX_COMPILER": "g++",
                 "CMAKE_BUILD_TYPE": "Debug"
             },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
             "inherits": [
                 "FirstPreset"
             ]
@@ -37,6 +41,10 @@
                 "CMAKE_C_COMPILER": "cl",
                 "CMAKE_CXX_COMPILER": "cl",
                 "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
             },
             "inherits": [
                 "FirstPreset"
@@ -55,6 +63,14 @@
             "description": "",
             "displayName": "",
             "configurePreset": "FirstPreset"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "NewTestPreset",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "BasicPresetCL-x64"
         }
     ]
 }

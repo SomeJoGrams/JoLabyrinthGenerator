@@ -4,6 +4,7 @@
 #include <set>
 #include <chrono>
 
+
 #include "Labyrinths.hpp"
 
 int main(int, char **)
@@ -13,7 +14,7 @@ int main(int, char **)
     const std::string whiteEmoji("⬜");
 
     auto start = std::chrono::steady_clock::now();
-    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 100,100);
+    Lab::Labyrinth2D inputVector = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::random, 10,10);
     auto end = std::chrono::steady_clock::now();
 
     std::chrono::duration<double> generationTime = end-start;
