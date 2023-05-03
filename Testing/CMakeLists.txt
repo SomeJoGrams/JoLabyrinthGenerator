@@ -3,9 +3,13 @@
 
 # just the copied build from the labyrinths library, and modified to interface
 add_library(GeneratorTesting INTERFACE)
-target_include_directories(GeneratorTesting INTERFACE ../include/)
 
-add_library(LabyrinthsTesting ../src/main.cpp ../src/Labyrinths.cpp )
+#message(${CMAKE_SOURCE_DIR} "source dir")
+
+target_include_directories(GeneratorTesting INTERFACE ${CMAKE_SOURCE_DIR}/include)
+
+#add_library(LabyrinthsTesting ../src/main.cpp ../src/Labyrinths.cpp )
+add_library(LabyrinthsTesting  ${CMAKE_SOURCE_DIR}/src/Labyrinths.cpp )
 target_link_libraries(LabyrinthsTesting GeneratorTesting)
 
 set_target_properties(GeneratorTesting LabyrinthsTesting PROPERTIES CXX_STANDARD 17)
@@ -23,7 +27,9 @@ MACRO(CREATE_TEST test_name)
     add_executable(${binary_name} "${test_name}Test.cpp" )
     target_link_libraries(${binary_name} PRIVATE LabyrinthsTesting GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
-    add_test("${test_name}TestBIN" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name})
+    message("vars " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} " name " ${binary_name} )
+    #add_test("${test_name}TestBIN" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name})
+    add_test("${test_name}TestBIN" ${binary_name})
     #ADD_DEPENDENCIES(tests ${binary_name})
 ENDMACRO()
 

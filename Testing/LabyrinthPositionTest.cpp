@@ -18,6 +18,7 @@
 
 namespace Lab{
 // The fixture for testing class Foo.
+// alternative fixture for testing
 class Position2DTest : public testing::Test {
  protected:
   // You can remove any or all of the following functions if their bodies would
@@ -38,6 +39,7 @@ class Position2DTest : public testing::Test {
     // Code here will be called immediately after the constructor (right
     // before each test).
     //myVec[0] = 3;
+    // firstPos{1,1};
   }
 
   void TearDown() override {
@@ -52,21 +54,26 @@ class Position2DTest : public testing::Test {
 
 };
 
-TEST(Position2DTest, POSEQUALOP){
+TEST(Position2DTest, PosEqualOperation){
   Lab::Position2D firstPos{1,1};
   Lab::Position2D secondPos{1,1};
   EXPECT_EQ(firstPos, secondPos); 
 }
 
-TEST(Position2DTest, POSEQUALOPWRONG){
+TEST(Position2DTest, PosEqualOperationWrong){
   Lab::Position2D firstPos{1,1};
   Lab::Position2D secondPos{2,1};
-  EXPECT_EQ(firstPos, secondPos); 
+  EXPECT_EQ(firstPos, secondPos) << "failed here"; 
 }
 
+// TODO use the fixture
 
 }
 
+// int main(int argc, char **argv) { // not needed bc of including Gtest main
+//   ::testing::InitGoogleTest(&argc, argv);
+//   return RUN_ALL_TESTS();
+// }
 
 // Lab::Labyrinth2D lab = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::nothing,10,10);   
 //  Lab::Labyrinth2D lab = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::nothing,10,10);   
