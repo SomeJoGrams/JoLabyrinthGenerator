@@ -1,5 +1,8 @@
 {
     "dependencies": [
-        "gtest"
+        {
+        "name": "gtest",
+        "platform": "(windows and x64) | (windows and x86)"
+        }
     ]
 }

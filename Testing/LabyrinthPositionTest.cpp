@@ -66,14 +66,16 @@ TEST(Position2DTest, PosEqualOperationWrong){
   EXPECT_EQ(firstPos, secondPos) << "failed here"; 
 }
 
+
 // TODO use the fixture
 
 }
 
-// int main(int argc, char **argv) { // not needed bc of including Gtest main
-//   ::testing::InitGoogleTest(&argc, argv);
-//   return RUN_ALL_TESTS();
-// }
+
+int main(int argc, char **argv) { // not needed bc of including Gtest main
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
 
 // Lab::Labyrinth2D lab = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::nothing,10,10);   
 //  Lab::Labyrinth2D lab = Lab::Labyrinth2DGenerator::generateLabyrinth(Lab::Pattern::nothing,10,10);   

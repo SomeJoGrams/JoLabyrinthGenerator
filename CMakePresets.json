@@ -70,7 +70,10 @@
             "name": "NewTestPreset",
             "description": "",
             "displayName": "",
-            "configurePreset": "BasicPresetCL-x64"
+            "configurePreset": "BasicPresetCL-x64",
+            "output":{
+                "verbosity" : "extra"
+            }
         }
     ]
 }
