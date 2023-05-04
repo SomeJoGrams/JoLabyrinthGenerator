@@ -37,6 +37,11 @@ namespace Lab
         return firstPos.xPosition == secondPos.xPosition && firstPos.yPosition == secondPos.yPosition;
     }
 
+    inline bool operator!=(const Position2D &firstPos, const Position2D &secondPos)
+    {
+        return !(firstPos == secondPos);
+    }
+
     struct TakenPaths{
         bool topPath;
         bool rightPath;

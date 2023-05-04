@@ -191,16 +191,16 @@ namespace Lab
 *   X 2 X
 */
     int PositionInterface::adjacentPoint(const Position2D origin, const Position2D goal){
-        if (origin.xPosition + 1== goal.xPosition && origin.yPosition == goal.yPosition){
+        if (origin.xPosition + 1 == goal.xPosition && origin.yPosition == goal.yPosition){
             return 1;
         }
-        else if(origin.xPosition == goal.xPosition && origin.yPosition - 1 == goal.yPosition){
+        else if(origin.xPosition == goal.xPosition && origin.yPosition + 1 == goal.yPosition){
             return 2;
         }
-        else if(origin.xPosition - 1== goal.xPosition && origin.yPosition == goal.yPosition){
+        else if(origin.xPosition - 1 == goal.xPosition && origin.yPosition == goal.yPosition){
             return 3;
         }
-        else if(origin.xPosition == goal.xPosition && origin.yPosition + 1 == goal.yPosition){
+        else if(origin.xPosition == goal.xPosition && origin.yPosition - 1 == goal.yPosition){
             return 4;
         }         
         return 0;

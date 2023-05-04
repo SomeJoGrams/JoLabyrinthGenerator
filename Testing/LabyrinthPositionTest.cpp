@@ -19,16 +19,30 @@
 namespace Lab{
 // The fixture for testing class Foo.
 // alternative fixture for testing
-class Position2DTest : public testing::Test {
+
+
+TEST(Position2DTest, PosEqualOperation){
+  Lab::Position2D firstPos{1,1};
+  Lab::Position2D secondPos{1,1};
+  EXPECT_EQ(firstPos, secondPos); 
+}
+
+TEST(Position2DTest, PosNotEqualOperationWrong){
+  Lab::Position2D firstPos{1,1};
+  Lab::Position2D secondPos{2,1};
+  EXPECT_NE(firstPos, secondPos);
+}
+
+class PositionInterfaceTest : public testing::Test {
  protected:
   // You can remove any or all of the following functions if their bodies would
   // be empty.
 
-  Position2DTest() {
+  PositionInterfaceTest() {
     // You can do set-up work for each test here.
   }
 
-  ~Position2DTest() override {
+  ~PositionInterfaceTest() override {
      // You can do clean-up work that doesn't throw exceptions here.
   }
 
@@ -37,9 +51,8 @@ class Position2DTest : public testing::Test {
 
   void SetUp() override {
     // Code here will be called immediately after the constructor (right
-    // before each test).
-    //myVec[0] = 3;
-    // firstPos{1,1};
+    // before each test).f
+
   }
 
   void TearDown() override {
@@ -49,23 +62,21 @@ class Position2DTest : public testing::Test {
 
   // Class members declared here can be used by all tests in the test suite
   // for Foo.
-    Lab::Position2D firstPos;
-    Lab::Position2D secondPos;
-
+    Lab::Position2D origin{1,1};
+    Lab::Position2D down{1,2};
+    Lab::Position2D left{0,1};
+    Lab::Position2D up{1,0};
+    Lab::Position2D right{2,1};
 };
 
-TEST(Position2DTest, PosEqualOperation){
-  Lab::Position2D firstPos{1,1};
-  Lab::Position2D secondPos{1,1};
-  EXPECT_EQ(firstPos, secondPos); 
+// test for a single origin
+TEST_F(PositionInterfaceTest, AdjacentPoint){
+  EXPECT_EQ(Lab::PositionInterface::adjacentPoint(origin,right),1);
+  EXPECT_EQ(Lab::PositionInterface::adjacentPoint(origin,down),2);
+  EXPECT_EQ(Lab::PositionInterface::adjacentPoint(origin,left),3);
+  EXPECT_EQ(Lab::PositionInterface::adjacentPoint(origin,up),4);
+  EXPECT_EQ(Lab::PositionInterface::adjacentPoint(origin,origin),0);
 }
-
-TEST(Position2DTest, PosEqualOperationWrong){
-  Lab::Position2D firstPos{1,1};
-  Lab::Position2D secondPos{2,1};
-  EXPECT_EQ(firstPos, secondPos) << "failed here"; 
-}
-
 
 // TODO use the fixture
 
